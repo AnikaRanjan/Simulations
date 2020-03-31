@@ -41,6 +41,15 @@ end_of_timestep_observer = function(data, vars, config){
 }
 
 
+#### START WIPOBSERVER ####
+# observer_summary = list(record_time_steps, observer_functions=list(
+#   function_name=function(record_time_steps, data, vars, config){
+#     #update internaly the vals#observer in a list for of time steps that match desired saving so it can be restored.
+#   }
+# ))
+#### END WIPOBSERVER ####
+
+
 ######################
 ### Initialization ###
 ######################
