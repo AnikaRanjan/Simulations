@@ -86,7 +86,7 @@ get_dispersal_values <- function(n, species, landscape, config) {
 ### Speciation ###
 ##################
 # threshold for genetic distance after which a speciation event takes place
-divergence_threshold = 10  ### Arbitrary value to ensure enough diversification wihtout stopping the simulation midway
+divergence_threshold = 12  ### Arbitrary value to ensure enough diversification wihtout stopping the simulation midway
 
 # factor by which the divergence is increased between geographicaly isolated population
 # can also be a matrix between the different population clusters
