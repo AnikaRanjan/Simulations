@@ -31,10 +31,11 @@ environmental_ranges = list("temp" = c(-40, 60))
 
 # a place to inspect the internal state of the simulation and collect additional information if desired
 end_of_timestep_observer = function(data, vars, config){
-  # a list of all species can be found in data$species
+  # a list of all species can be found in data$all_species
   # the current landscape can be found in data$landscape
+  save_landscape()
+  save_species()
 }
-
 
 ######################
 ### Initialization ###
@@ -43,7 +44,7 @@ end_of_timestep_observer = function(data, vars, config){
 initial_abundance = 1
 
 # place species within rectangle:
-create_initial_species <- function(landscape, config) {
+create_ancestor_species <- function(landscape, config) {
   #range <- c(-180, 180, -90, 90)
   range <- c(-180, 180, -90, 90)
   co <- landscape$coordinates
@@ -95,6 +96,7 @@ get_divergence_factor <- function(species, cluster_indices, landscape, config) {
 ### Mutation ###
 ################
 # mutate the traits of a species and return the new traits matrix
+print(getwd())
 source("../modules/mutation_mode_adaptive.R", local = T)
 apply_evolution <- mutation_mode_adaptive(evolving_traits = c("t_min", "p_min"),
                                      trait_rules = list(relation=NULL, tr_planes=c("t_min", "p_min")),

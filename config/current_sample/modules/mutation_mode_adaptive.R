@@ -148,7 +148,7 @@ tr.homogenize <- function(clu_tr_spi_x, abundance, tr_names, tr_rules, config){
 
   if (length(tr_rules$tr_plane)!=0) { # check if there is any trait off surface rules to be applied
     # calculate new tr sum
-    sum_trs <- sum(hom_clu_tr_spi[tr_rules$tr_plane, drop=F])
+    sum_trs <- sum(hom_clu_tr_spi[tr_rules$tr_plane, drop=F], na.rm=T)
     if ( sum_trs > 1 ) {
       # to limit traits to the surface where sum of g_max,c and l = 1
       hom_clu_tr_spi <- config$user$bring.traits.to.surface(traits_sp=t(as.matrix(hom_clu_tr_spi)), traits_plane=tr_rules$tr_plane)
