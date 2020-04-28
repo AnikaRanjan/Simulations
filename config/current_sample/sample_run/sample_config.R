@@ -4,7 +4,7 @@
 ### General settings ###
 ########################
 # set the random seed for the simulation
-random_seed = NA
+random_seed = 666
 
 # set the starting time step or leave NA to use the earliest/highest timestep
 start_time = NA
@@ -21,7 +21,7 @@ max_number_of_coexisting_species = 1e5
 # a list of traits to include with each species
 # a "dispersion" trait is implictly added in any case
 #trait_names = c("t_min", "a_min", "competition", "dispersion")
-trait_names = c("t_min", "p_min", "dispersial")
+trait_names = c("t_min", "p_min", "dispersal")
 
 # ranges to scale the input environemts with:
 # not listed variable:         no scaling takes place
@@ -35,6 +35,7 @@ end_of_timestep_observer = function(data, vars, config){
   # the current landscape can be found in data$landscape
   save_landscape()
   save_species()
+  save_traits()
 }
 
 ######################
@@ -64,12 +65,13 @@ create_ancestor_species <- function(landscape, config) {
 }
 
 
+
 #################
 ### Dispersal ###
 #################
 # returns n dispersal values
 get_dispersal_values <- function(n, species, landscape, config) {
-  dispersal_range = c(0, 444)
+  dispersal_range = c(0, 666)
   disp_factor <- 1
   scale <- ((dispersal_range[2] - dispersal_range[1]) * disp_factor ) + dispersal_range[1]
 
@@ -83,7 +85,7 @@ get_dispersal_values <- function(n, species, landscape, config) {
 ##################
 # threshold for genetic distance after which a speciation event takes place
 # speciation after every timestep : 0.9
-divergence_threshold = 0.9
+divergence_threshold = 24
 
 # ifactor by which the genetic distance is increased between geographicaly isolated population of a species
 # can also be a matrix between the different population clusters
@@ -96,12 +98,11 @@ get_divergence_factor <- function(species, cluster_indices, landscape, config) {
 ### Mutation ###
 ################
 # mutate the traits of a species and return the new traits matrix
-print(getwd())
 source("../modules/mutation_mode_adaptive.R", local = T)
 apply_evolution <- mutation_mode_adaptive(evolving_traits = c("t_min", "p_min"),
                                      trait_rules = list(relation=NULL, tr_planes=c("t_min", "p_min")),
-                                     mutation_factor = 0.2,
-                                     trait_evolutionary_power = 0.05)
+                                     mutation_factor = 0.1,
+                                     trait_evolutionary_power = 0.1)
 
 
 ###############
@@ -110,26 +111,21 @@ apply_evolution <- mutation_mode_adaptive(evolving_traits = c("t_min", "p_min"),
 # called for every cell with all occuring species, this functin calculates who survives in the current cells
 # returns a vector of abundances
 # set the abundance to 0 for every species supposed to die
-apply_ecology <- function(species, landscape, config) {
+apply_ecology <- function(abundance, traits, local_environment, config) {
+  # browser()
   rt= 0.1
-  rp= 1
   rt2=rt/2
-  rp2=rp/2
   #temp
-  t_min <- species[,"t_min"]
+  t_min <- traits[,"t_min"]
   t_max <- t_min+rt
-  t_env <- landscape[,"temp"] #env temp
-  #aridity
-  p_min <- species[,"p_min"]
-  p_max <- p_min+rp
-  p_env <- landscape[,"precipitation"] #env precipitation
+  t_env <- local_environment[,"temp"] #env temp
   #equation---------
   #growth
-  g <- pmin(1-(1/(rt2^2)*(t_env-(t_min+rt2))^2),1-(1/(rp2^2)*(p_env-(p_min+rp2))^2))
+  g <- (1/(rt2^2)*(t_env-(t_min+rt2))^2)
   #logical if inside range
-  at <- as.numeric((t_min<=t_env & t_max>=t_env)&(p_min<=p_env & p_max>=p_env))
+  at <- as.numeric((t_min<=t_env & t_max>=t_env))
   #final biomasses
-  abd <- g*at*100
+  abd <- g*(at*100)
   #end equation-------
   return(abd)
 }

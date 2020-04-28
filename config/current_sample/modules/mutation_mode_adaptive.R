@@ -21,11 +21,13 @@ mutation_mode_adaptive <- function(evolving_traits,
     traits_clusters <- split(as.data.frame(species[["traits"]]), cluster_indices)
     abundance_clusters <- split(species[["abundance"]], cluster_indices)
 
+    # browser()
+
     traits_clusters <- mapply(config$user$tr.homogenize,
                               traits_clusters,
                               abundance_clusters,
                               MoreArgs = list(
-                                tr_names = config$rgasm$general$trait_names,
+                                tr_names = config$gen3sis$general$trait_names,
                                 tr_rules = trait_rules,
                                 config = config),
                               SIMPLIFY = FALSE
@@ -56,17 +58,21 @@ mutation_mode_adaptive <- function(evolving_traits,
 
       NEW_clu_tr_spi[mutations, evolving_traits] <- NEW_clu_tr_spi[mutations, evolving_traits, drop=F] + mutation_deltas
 
+
       # apply tradeoff.traits
       NEW_clu_tr_spi[mutations,] <- config$user$tradeoff.traits(traits=NEW_clu_tr_spi[mutations, ,drop=F],
                                                                 rules = trait_rules$relation)
+      
 
       #avoid traits outside the range
       NEW_clu_tr_spi[mutations,] <- config$user$limit.traits.range(traits = NEW_clu_tr_spi[mutations, ,drop=F],
                                                                    trait_names = config$rgasm$general$trait_names,
                                                                    range = c(0,1))
 
+      # browser()
       if (length(trait_rules$tr_plane)!=0) { # check if there is any trait off surface rules to be applied
         # calculate new tr sum
+
         sum_trs <- rowSums(NEW_clu_tr_spi[ ,trait_rules$tr_plane, drop=F])
 
         # to limit traits to the surface where sum of g_max,c and l = 1
@@ -134,21 +140,23 @@ bring.traits.to.surface <- function(traits_sp, traits_plane){
 tr.homogenize <- function(clu_tr_spi_x, abundance, tr_names, tr_rules, config){
   # updating eco (traits and abundance.... here I homegenize the traits per cluster!)
   # clu_tr_spi_x is one of the lists of the geo_cluster of the species
+  
+  # browser(text="inside tr.homogenize")
+  
   nrow_clu_tr_spi_x <- nrow(clu_tr_spi_x)
   clu_tr_spi_x <- as.matrix(clu_tr_spi_x)
   #if (nrow_clu_tr_spi_x>1) { #check if more than one line
   mean_abd <- mean(abundance)
 
   weight_abd <- abundance/mean_abd
-
-
   hom_clu_tr_spi <- colMeans(clu_tr_spi_x[,tr_names, drop=F]*weight_abd)
 
 
 
   if (length(tr_rules$tr_plane)!=0) { # check if there is any trait off surface rules to be applied
     # calculate new tr sum
-    sum_trs <- sum(hom_clu_tr_spi[tr_rules$tr_plane, drop=F], na.rm=T)
+    sum_trs <- sum(hom_clu_tr_spi[tr_rules$tr_plane, drop=F])
+
     if ( sum_trs > 1 ) {
       # to limit traits to the surface where sum of g_max,c and l = 1
       hom_clu_tr_spi <- config$user$bring.traits.to.surface(traits_sp=t(as.matrix(hom_clu_tr_spi)), traits_plane=tr_rules$tr_plane)
