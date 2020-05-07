@@ -3,4 +3,5 @@
 .RData
 .Ruserdata
 output/
-
+landscape/CaseStudy2/world_4d/distances_full
+landscape/CaseStudy2/world_4d/distances_local
